@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Built-By: andrew
+Build-Jdk: 10.0.2
+Implementation-Title: Resell
+Implementation-Version: 0.0.1-SNAPSHOT
+Implementation-Vendor-Id: cards.resell
+Implementation-URL: https://projects.spring.io/spring-boot/#/spring-bo
+ ot-starter-parent/Resell
+Created-By: Maven Integration for Eclipse
+
