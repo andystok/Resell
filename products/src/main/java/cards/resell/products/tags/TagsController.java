@@ -34,7 +34,11 @@ public class TagsController {
 	@GetMapping("/tags/name/{name}")
 	public Tag getTagByName(@PathVariable(name = "name") String name) {
 		// This should always return a list of exactly one Tag, if more than one is found, return the top one for now
-		// I do not plan on allowing tags with duplicate names. 
+		// I do not plan on allowing tags with duplicate names.
+		List<Tag> tagList = tagRepository.findByName(name);
+		if (tagList.isEmpty()) {
+			return null;
+		}
 		return tagRepository.findByName(name).get(0);
 	}
 	

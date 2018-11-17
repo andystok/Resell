@@ -15,12 +15,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.NaturalId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -28,10 +27,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import cards.resell.products.Product;
+import cards.resell.products.attributes.Attribute;
 import cards.resell.products.tags.Tag;
 
 @Entity(name = "Version")
-@Table(name = "versions", uniqueConstraints={@UniqueConstraint(columnNames={"name"})})
+@Table(name = "versions")
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, allowGetters = true)
 public class Version {
@@ -40,10 +40,8 @@ public class Version {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long versionId;
 	
-	@NaturalId
+	@Column(unique=true)
 	private String name;
-	
-	private Tag primaryTag;
 	
 	@ManyToMany(mappedBy = "versions")
     private Set<Product> products = new HashSet<>();
@@ -57,17 +55,32 @@ public class Version {
         inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<Tag> versionTags = new HashSet<>();
+	@ManyToMany(cascade = { 
+        CascadeType.PERSIST, 
+        CascadeType.MERGE
+    })
+    @JoinTable(name = "version_attributes",
+        joinColumns = @JoinColumn(name = "version_id"),
+        inverseJoinColumns = @JoinColumn(name = "attribute_id")
+    )
+    private Set<Attribute> requiredAttributes = new HashSet<>();
 	
+
 	@Column(nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     private Date createdAt;
-
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     private Date updatedAt;
-	
+    
+    public Version() {}
+    
+    public Version(String name) {
+    	this.name = name;
+    }
+    
 	@Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -105,14 +118,6 @@ public class Version {
 		this.name = name;
 	}
 
-	public Tag getPrimaryTag() {
-		return primaryTag;
-	}
-
-	public void setPrimaryTag(Tag primaryTag) {
-		this.primaryTag = primaryTag;
-	}
-
 	public Set<Tag> getVersionTags() {
 		return versionTags;
 	}
@@ -121,5 +126,12 @@ public class Version {
 		this.versionTags = versionTags;
 	}
 	
+	public Set<Attribute> getRequiredAttributes() {
+		return requiredAttributes;
+	}
+
+	public void setRequiredAttributes(Set<Attribute> requiredAttributes) {
+		this.requiredAttributes = requiredAttributes;
+	}
 	
 }

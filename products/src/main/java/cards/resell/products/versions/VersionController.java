@@ -30,6 +30,15 @@ public class VersionController {
 		return versionRepository.save(version);		
 	}
 	
+	@GetMapping("/version/name/{name}")
+	public Version getVersionByName(@PathVariable(name = "name") String name) {
+		List<Version> versions = versionRepository.findByName(name);
+		if (versions.isEmpty()) {
+			return null;
+		}
+		return versions.get(0);
+	}
+	
 	@PutMapping("/version/{versionId}")
 	public Version updateVersion(@Valid @RequestBody Version version, @PathVariable(name = "versionId") Long versionId) {
 		version.setVersionId(versionId);

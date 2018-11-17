@@ -14,13 +14,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -29,12 +26,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import cards.resell.products.attributes.AttributeValue;
 import cards.resell.products.images.Image;
 import cards.resell.products.tags.Tag;
 import cards.resell.products.versions.Version;
 
 @Entity
-@Table(name = "products", uniqueConstraints={@UniqueConstraint(columnNames={"productName","primaryCategory"})})
+@Table(name = "products")
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, allowGetters = true)
 public class Product {
@@ -44,37 +42,29 @@ public class Product {
 	private Long productId;
 
 	@NotBlank
+	@Column(name ="productName")
 	private String productName;
 
-	@ManyToMany(cascade = { 
-        CascadeType.PERSIST, 
-        CascadeType.MERGE
-    })
+	@ManyToMany
     @JoinTable(name = "product_tags",
         joinColumns = @JoinColumn(name = "product_id"),
         inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<Tag> tags = new HashSet<>();
 	
-	@NotBlank
 	@ManyToMany
-	@Column(name = "primaryCategory")
-	private Tag primaryCategory;
-	
-	@ManyToMany(cascade = {
-        CascadeType.PERSIST, 
-        CascadeType.MERGE
-    })
     @JoinTable(name = "product_versions",
         joinColumns = @JoinColumn(name = "product_id"),
         inverseJoinColumns = @JoinColumn(name = "version_id")
     )
     private Set<Version> versions = new HashSet<>();
 	
-	@NotBlank
 	@ManyToMany
-	@Column(name = "primaryVersion")
-	private Version primaryVersion;
+    @JoinTable(name = "product_attribute_values",
+        joinColumns = @JoinColumn(name = "product_id"),
+        inverseJoinColumns = @JoinColumn(name = "attribute_value_id")
+    )
+    private Set<AttributeValue> attributes = new HashSet<>();
 	
 	@OneToMany(
 		mappedBy = "product",
@@ -94,13 +84,7 @@ public class Product {
     private Date updatedAt;
     
     private String description;
-    
-    @Transient
-    private boolean createTags;
-    
-    @Transient
-    private boolean createVersions;
-    
+
     public Product() {}
 	 
     public Product(String name) {
@@ -163,28 +147,12 @@ public class Product {
 		return updatedAt;
 	}
 
-	public Tag getPrimaryCategory() {
-		return primaryCategory;
-	}
-
-	public void setPrimaryCategory(Tag primaryCategory) {
-		this.primaryCategory = primaryCategory;
-	}
-
 	public Set<Tag> getTags() {
 		return tags;
 	}
 
 	public void setTags(Set<Tag> tags) {
 		this.tags = tags;
-	}
-
-	public boolean isCreateTags() {
-		return createTags;
-	}
-
-	public void setCreateTags(boolean createTags) {
-		this.createTags = createTags;
 	}
 
 	public Set<Version> getVersions() {
@@ -203,28 +171,20 @@ public class Product {
 		this.description = description;
 	}
 
-	public boolean isCreateVersions() {
-		return createVersions;
-	}
-
-	public void setCreateVersions(boolean createVersions) {
-		this.createVersions = createVersions;
-	}
-
-	public Version getPrimaryVersion() {
-		return primaryVersion;
-	}
-
-	public void setPrimaryVersion(Version primaryVersion) {
-		this.primaryVersion = primaryVersion;
-	}
-
 	public Set<Image> getImages() {
 		return images;
 	}
 
 	public void setImages(Set<Image> images) {
 		this.images = images;
+	}
+
+	public Set<AttributeValue> getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(Set<AttributeValue> attributes) {
+		this.attributes = attributes;
 	}
 	
     

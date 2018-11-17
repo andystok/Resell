@@ -1,20 +1,24 @@
-package cards.resell.products.tags;
+package cards.resell.products.attributes;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -23,26 +27,25 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import cards.resell.products.Product;
-import cards.resell.products.versions.Version;
 
-@Entity(name = "Tag")
-@Table(name = "tags")
+@Entity
+@Table(name = "attribute_values", uniqueConstraints={@UniqueConstraint(columnNames={"name","attribute"})})
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, allowGetters = true)
-public class Tag {
-	
+public class AttributeValue {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long tagId;
-	
-	@Column(unique=true)
+	private Long attributeValueId;
+
 	private String name;
 	
-	@ManyToMany(mappedBy = "tags")
-    private Set<Product> products = new HashSet<>();
+	@ManyToOne(targetEntity=Attribute.class, fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+	@JoinColumn(name = "attribute")
+	private Attribute attribute;
 	
-	@ManyToMany(mappedBy = "versionTags")
-    private Set<Version> versions = new HashSet<>();
+	@ManyToMany(mappedBy = "attributes" )
+	private Set<Product> products = new HashSet<>();
 	
 	@Column(nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -53,32 +56,20 @@ public class Tag {
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     private Date updatedAt;
-	
-	public Tag() {}
-	 
-    public Tag(String name) {
-        this.name = name;
-    }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Tag tag = (Tag) o;
-        return Objects.equals(name, tag.name);
+    public AttributeValue() {}
+    
+    public AttributeValue(Attribute attribute, String name) {
+    	setName(name);
+    	setAttribute(attribute);
     }
- 
-    @Override
-    public int hashCode() {
-        return Objects.hash(name);
-    }
-
-	public Long getTagId() {
-		return tagId;
+    
+	public Long getAttributeValueId() {
+		return attributeValueId;
 	}
 
-	public void setTagId(Long tagId) {
-		this.tagId = tagId;
+	public void setAttributeValueId(Long attributeValueId) {
+		this.attributeValueId = attributeValueId;
 	}
 
 	public String getName() {
@@ -89,6 +80,14 @@ public class Tag {
 		this.name = name;
 	}
 
+	public Attribute getAttribute() {
+		return attribute;
+	}
+
+	public void setAttribute(Attribute attribute) {
+		this.attribute = attribute;
+	}
+
 	public Set<Product> getProducts() {
 		return products;
 	}
@@ -96,16 +95,6 @@ public class Tag {
 	public void setProducts(Set<Product> products) {
 		this.products = products;
 	}
-
-	public Set<Version> getVersions() {
-		return versions;
-	}
-
-	public void setVersions(Set<Version> versions) {
-		this.versions = versions;
-	}
-	
     
     
-
 }

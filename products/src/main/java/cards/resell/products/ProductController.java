@@ -1,7 +1,6 @@
 package cards.resell.products;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -16,6 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import cards.resell.products.attributes.Attribute;
+import cards.resell.products.attributes.AttributeController;
+import cards.resell.products.attributes.AttributeValue;
+import cards.resell.products.attributes.AttributeValuesController;
 import cards.resell.products.exception.ResourceNotFoundException;
 import cards.resell.products.repository.ProductRepository;
 import cards.resell.products.tags.Tag;
@@ -30,6 +33,19 @@ public class ProductController {
 	@Autowired
 	ProductRepository productRepository;
 	
+	@Autowired 
+	TagsController tagger;
+	
+	@Autowired
+	VersionController versioner;
+	
+	@Autowired 
+	AttributeValuesController valuer;
+	
+	@Autowired
+	AttributeController attributor;
+	
+	
 	// Get all Products 
 	@GetMapping("/products")
 	public List<Product> getAllProducts(){
@@ -38,50 +54,43 @@ public class ProductController {
 	
 	@GetMapping("/products/tagName/{name}")
 	public List<Product> getAllProductsByTagName(@PathVariable(name = "name") String name){
-		return productRepository.findByTagName(name);
+		return productRepository.findByTagsName(name);
 	}
 	
-	// Create Product
-	// Call one without creating versions or tags, and if fails call again with flags set
 	@PostMapping("/products")
-	public Product createProduct(@Valid @RequestBody Product product ) {
-
-		// Optional : Create Versions
-		if (product.isCreateVersions()) {
-			VersionController versionMaker = new VersionController();  
-			for (Version version : product.getVersions()) {
-				versionMaker.createVersion(version);
+	public Product createProduct(@Valid @RequestBody Product product ) {	
+		for(Tag tag : product.getTags()) {
+			Tag existingTag = tagger.getTagByName(tag.getName()); 
+			if (existingTag == null) {
+				tag = tagger.createTag(tag);
+			} else {
+				tag.setTagId(existingTag.getTagId());
 			}
 		}
-
-		// Optional : Create Tags
-		if (product.isCreateTags()) {
-			TagsController tagMaker = new TagsController();
-			Set<Tag> tags = product.getTags();
-			for (Tag tag: tags) {
-				tagMaker.createTag(tag);
-			}
-			tagMaker.createTag(product.getPrimaryCategory());
-		}
-		
-		// Make sure primaries are part of their sets 
-		product.getTags().add(product.getPrimaryCategory());		
-		product.getVersions().add(product.getPrimaryVersion());
-		
-		
-		// TODO Look at this error handling. Possibly make the caller handle this. 
-		Product result = null;
-		try { 
-			result = productRepository.save(product);
-		} catch (Exception e) {
-			if (!product.isCreateVersions() || !product.isCreateTags()) {
-				product.setCreateTags(true);
-				product.setCreateVersions(true);
-				result = createProduct(product);
+		for(Version version : product.getVersions()) {
+			Long versionId = versioner.getVersionByName(version.getName()).getVersionId();
+			if (versionId == null) {
+				version = versioner.createVersion(version);
+			} else {
+				version.setVersionId(versionId);
 			}
 		}
-		
-		return result; 
+		for(AttributeValue attr : product.getAttributes()) {
+			AttributeValue existingValue = valuer.getAttributeValueByName(attr.getName(), attr.getAttribute().getName());
+			if (existingValue == null) {
+				Attribute existingAttribute = attributor.getAttributeByName(attr.getAttribute().getName()); 
+				if (existingAttribute == null) {
+					attr.setAttribute(attributor.createAttribute(attr.getAttribute()));
+				} else {
+					attr.getAttribute().setAttributeId(existingAttribute.getAttributeId());
+				}
+				attr = valuer.createAttributeValue(attr);				
+			} else {
+				attr.setAttributeValueId(existingValue.getAttributeValueId());
+			}
+			
+		}
+		return productRepository.save(product);
 	}
 	
 	// Get a single Product
@@ -97,11 +106,10 @@ public class ProductController {
 			@Valid @RequestBody Product productInformation) {
 		Product product = productRepository.findById(productId)
 	            .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
-
-		product.setProductName(productInformation.getProductName());
-
-	    Product updatedNote = productRepository.save(product);
-	    return updatedNote;
+		
+		productInformation.setProductId(product.getProductId());
+		
+ 	    return productRepository.save(productInformation);
 	}
 	
 	// Delete a Product 
