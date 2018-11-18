@@ -5,15 +5,12 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -24,8 +21,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import cards.resell.products.Product;
 
 @Entity
 @Table(name = "attributes")
@@ -42,9 +37,6 @@ public class Attribute {
 	
 	@OneToMany
 	private Set<AttributeValue> allowedValues = new HashSet<>();
-	
-	@ManyToMany(mappedBy = "attributes",  fetch = FetchType.EAGER, cascade=CascadeType.ALL )
-	private Set<Product> products = new HashSet<>();
 	
 	@Column(nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)

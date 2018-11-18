@@ -1,9 +1,7 @@
 package cards.resell.products.attributes;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,7 +12,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -26,8 +23,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import cards.resell.products.Product;
 
 @Entity
 @Table(name = "attribute_values", uniqueConstraints={@UniqueConstraint(columnNames={"value","attribute"})})
@@ -44,9 +39,6 @@ public class AttributeValue {
 	@ManyToOne(targetEntity=Attribute.class, fetch = FetchType.EAGER, cascade=CascadeType.ALL)
 	@JoinColumn(name = "attribute")
 	private Attribute attribute;
-	
-	@ManyToMany(mappedBy = "attributes",  fetch = FetchType.EAGER, cascade=CascadeType.ALL )
-	private Set<Product> products = new HashSet<>();
 	
 	@Column(nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -105,14 +97,4 @@ public class AttributeValue {
 	public void setAttribute(Attribute attribute) {
 		this.attribute = attribute;
 	}
-
-	public Set<Product> getProducts() {
-		return products;
-	}
-
-	public void setProducts(Set<Product> products) {
-		this.products = products;
-	}
-    
-    
 }

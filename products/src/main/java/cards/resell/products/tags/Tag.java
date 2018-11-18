@@ -21,8 +21,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import cards.resell.products.Product;
 import cards.resell.products.versions.Version;
 
 @Entity(name = "Tag")
@@ -37,9 +35,6 @@ public class Tag {
 	
 	@Column(unique=true)
 	private String name;
-	
-	@ManyToMany(mappedBy = "tags")
-    private Set<Product> products = new HashSet<>();
 	
 	@ManyToMany(mappedBy = "versionTags")
     private Set<Version> versions = new HashSet<>();
@@ -87,14 +82,6 @@ public class Tag {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public Set<Product> getProducts() {
-		return products;
-	}
-
-	public void setProducts(Set<Product> products) {
-		this.products = products;
 	}
 
 	public Set<Version> getVersions() {

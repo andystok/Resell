@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -69,11 +68,7 @@ public class Product {
     )
     private Map<Attribute, AttributeValue> attributes = new HashMap<>();
 	
-	@OneToMany(
-		mappedBy = "product",
-        cascade = CascadeType.ALL, 
-        orphanRemoval = true
-    )
+	@OneToMany
     private Set<Image> images = new HashSet<>();
 	
 	@Column(nullable = false, updatable = false)
@@ -92,26 +87,6 @@ public class Product {
 	 
     public Product(String name) {
         this.productName = name;
-    }
-    
-    public void addImage(Image image) {
-    	images.add(image);
-    	image.setProduct(this);
-    }
-    
-    public void removeImage(Image image) {
-    	images.remove(image);
-    	image.setProduct(null);
-    }
-    
-    public void addTag(Tag tag) {
-        tags.add(tag);
-        tag.getProducts().add(this);
-    }
- 
-    public void removeTag(Tag tag) {
-        tags.remove(tag);
-        tag.getProducts().remove(this);
     }
     
     @Override
@@ -181,6 +156,7 @@ public class Product {
 	public void setImages(Set<Image> images) {
 		this.images = images;
 	}
+	
 
 	public Map<Attribute, AttributeValue> getAttributes() {
 		return attributes;

@@ -25,7 +25,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import cards.resell.products.Product;
 import cards.resell.products.attributes.Attribute;
 import cards.resell.products.tags.Tag;
 
@@ -41,9 +40,6 @@ public class Version {
 	
 	@Column(unique=true)
 	private String name;
-	
-	@ManyToMany(mappedBy = "versions")
-    private Set<Product> products = new HashSet<>();
 
 	@ManyToMany(cascade = { 
         CascadeType.PERSIST, 
@@ -54,7 +50,7 @@ public class Version {
         inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<Tag> versionTags = new HashSet<>();
-	@ManyToMany(cascade = { 
+	@ManyToMany(cascade = {
         CascadeType.PERSIST, 
         CascadeType.MERGE
     })
@@ -92,14 +88,6 @@ public class Version {
     public int hashCode() {
         return Objects.hash(name);
     }
-    
-	public Set<Product> getProducts() {
-		return products;
-	}
-
-	public void setProducts(Set<Product> products) {
-		this.products = products;
-	}
 
 	public Long getVersionId() {
 		return versionId;
