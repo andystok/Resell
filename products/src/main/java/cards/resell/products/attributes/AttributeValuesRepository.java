@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AttributeValuesRepository extends JpaRepository<AttributeValue, Long> {
 	
-	public List<AttributeValue> findByNameAndAttributeName(String valueName, String attributeName);
+	public List<AttributeValue> findByValueAndAttributeName(String valueName, String attributeName);
 }

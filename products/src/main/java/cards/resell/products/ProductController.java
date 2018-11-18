@@ -1,6 +1,10 @@
 package cards.resell.products;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.validation.Valid;
 
@@ -68,27 +72,40 @@ public class ProductController {
 			}
 		}
 		for(Version version : product.getVersions()) {
-			Long versionId = versioner.getVersionByName(version.getName()).getVersionId();
-			if (versionId == null) {
+			Version existingVersion = versioner.getVersionByName(version.getName()); 
+			if (existingVersion == null) {
 				version = versioner.createVersion(version);
 			} else {
-				version.setVersionId(versionId);
+				version.setVersionId(existingVersion.getVersionId());
 			}
 		}
-		for(AttributeValue attr : product.getAttributes()) {
-			AttributeValue existingValue = valuer.getAttributeValueByName(attr.getName(), attr.getAttribute().getName());
-			if (existingValue == null) {
-				Attribute existingAttribute = attributor.getAttributeByName(attr.getAttribute().getName()); 
-				if (existingAttribute == null) {
-					attr.setAttribute(attributor.createAttribute(attr.getAttribute()));
-				} else {
-					attr.getAttribute().setAttributeId(existingAttribute.getAttributeId());
-				}
-				attr = valuer.createAttributeValue(attr);				
-			} else {
-				attr.setAttributeValueId(existingValue.getAttributeValueId());
+		
+		Map<Attribute, AttributeValue> attributes = product.getAttributes();
+		Map<Attribute, AttributeValue> newAttributes = new HashMap<>();
+
+		// Create a Iterator to EntrySet of HashMap
+		Iterator<Entry<Attribute, AttributeValue>> entryIt = attributes.entrySet().iterator();
+		 
+		// Iterate over all the elements
+		while (entryIt.hasNext()) {
+			Entry<Attribute, AttributeValue> attr = entryIt.next();
+			Attribute existingAttribute = attributor.getAttributeByName(attr.getKey().getName()); 
+			if (existingAttribute == null) {
+				existingAttribute = attributor.createAttribute(attr.getKey());				
 			}
-			
+			entryIt.remove();
+			newAttributes.put(existingAttribute, attr.getValue());
+		}
+		attributes.putAll(newAttributes);
+		
+		for(Entry<Attribute, AttributeValue> attr : attributes.entrySet()) {
+			AttributeValue existingValue = valuer.getAttributeValueByName(attr.getValue().getValue(), attr.getKey().getName());
+			if (existingValue == null) {
+				AttributeValue newAttribute = new AttributeValue(attr.getKey(), attr.getValue().getValue());
+				attr.setValue(valuer.createAttributeValue(newAttribute));				
+			} else {
+				attr.getValue().setAttributeValueId(existingValue.getAttributeValueId());
+			}
 		}
 		return productRepository.save(product);
 	}

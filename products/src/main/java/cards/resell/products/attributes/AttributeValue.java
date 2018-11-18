@@ -2,6 +2,7 @@ package cards.resell.products.attributes;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -29,7 +30,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import cards.resell.products.Product;
 
 @Entity
-@Table(name = "attribute_values", uniqueConstraints={@UniqueConstraint(columnNames={"name","attribute"})})
+@Table(name = "attribute_values", uniqueConstraints={@UniqueConstraint(columnNames={"value","attribute"})})
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, allowGetters = true)
 public class AttributeValue {
@@ -38,13 +39,13 @@ public class AttributeValue {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long attributeValueId;
 
-	private String name;
+	private String value;
 	
 	@ManyToOne(targetEntity=Attribute.class, fetch = FetchType.EAGER, cascade=CascadeType.ALL)
 	@JoinColumn(name = "attribute")
 	private Attribute attribute;
 	
-	@ManyToMany(mappedBy = "attributes" )
+	@ManyToMany(mappedBy = "attributes",  fetch = FetchType.EAGER, cascade=CascadeType.ALL )
 	private Set<Product> products = new HashSet<>();
 	
 	@Column(nullable = false, updatable = false)
@@ -59,9 +60,26 @@ public class AttributeValue {
 
     public AttributeValue() {}
     
-    public AttributeValue(Attribute attribute, String name) {
-    	setName(name);
+    public AttributeValue(String value) {
+    	setValue(value);
+    }
+    
+    public AttributeValue(Attribute attribute, String value) {
+    	setValue(value);
     	setAttribute(attribute);
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AttributeValue attribute = (AttributeValue) o;
+        return Objects.equals(value, attribute.getValue());
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
     
 	public Long getAttributeValueId() {
@@ -72,12 +90,12 @@ public class AttributeValue {
 		this.attributeValueId = attributeValueId;
 	}
 
-	public String getName() {
-		return name;
+	public String getValue() {
+		return value;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setValue(String value) {
+		this.value = value;
 	}
 
 	public Attribute getAttribute() {

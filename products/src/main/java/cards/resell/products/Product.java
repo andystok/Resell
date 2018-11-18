@@ -1,7 +1,9 @@
 package cards.resell.products;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -26,6 +28,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import cards.resell.products.attributes.Attribute;
 import cards.resell.products.attributes.AttributeValue;
 import cards.resell.products.images.Image;
 import cards.resell.products.tags.Tag;
@@ -62,9 +65,9 @@ public class Product {
 	@ManyToMany
     @JoinTable(name = "product_attribute_values",
         joinColumns = @JoinColumn(name = "product_id"),
-        inverseJoinColumns = @JoinColumn(name = "attribute_value_id")
+        inverseJoinColumns = @JoinColumn(name = "attribute_value_id") 
     )
-    private Set<AttributeValue> attributes = new HashSet<>();
+    private Map<Attribute, AttributeValue> attributes = new HashMap<>();
 	
 	@OneToMany(
 		mappedBy = "product",
@@ -179,13 +182,14 @@ public class Product {
 		this.images = images;
 	}
 
-	public Set<AttributeValue> getAttributes() {
+	public Map<Attribute, AttributeValue> getAttributes() {
 		return attributes;
 	}
 
-	public void setAttributes(Set<AttributeValue> attributes) {
+	public void setAttributes(Map<Attribute, AttributeValue> attributes) {
 		this.attributes = attributes;
 	}
+	
 	
     
 }
