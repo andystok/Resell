@@ -1,9 +1,7 @@
 package cards.resell.products.tags;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,7 +9,6 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -21,7 +18,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import cards.resell.products.versions.Version;
 
 @Entity(name = "Tag")
 @Table(name = "tags")
@@ -35,9 +31,6 @@ public class Tag {
 	
 	@Column(unique=true)
 	private String name;
-	
-	@ManyToMany(mappedBy = "versionTags")
-    private Set<Version> versions = new HashSet<>();
 	
 	@Column(nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -83,16 +76,5 @@ public class Tag {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public Set<Version> getVersions() {
-		return versions;
-	}
-
-	public void setVersions(Set<Version> versions) {
-		this.versions = versions;
-	}
-	
-    
-    
 
 }

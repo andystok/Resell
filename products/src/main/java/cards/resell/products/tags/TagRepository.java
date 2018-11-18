@@ -1,10 +1,8 @@
-package cards.resell.products.tags.repository;
+package cards.resell.products.tags;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import cards.resell.products.tags.Tag;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
 

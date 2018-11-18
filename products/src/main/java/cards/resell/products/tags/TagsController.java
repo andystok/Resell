@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import cards.resell.products.tags.repository.TagRepository;
-
 @RestController
 @RequestMapping("/api")
 public class TagsController {
